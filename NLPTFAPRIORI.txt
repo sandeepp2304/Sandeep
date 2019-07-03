@@ -1,0 +1,683 @@
+# ********************************************TIME FORECASTING **********************************
+#******************************************______________________********************************
+#************************************************************************************************
+
+
+https://machinelearningmastery.com/time-series-prediction-lstm-recurrent-neural-networks-python-keras/
+
+https://machinelearningmastery.com/time-series-prediction-with-deep-learning-in-python-with-keras/
+
+#import the packages
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+import matplotlib.pylab as plt
+%matplotlib inline
+from matplotlib.pylab import rcParams
+rcParams['figure.figsize'] = 10, 6
+
+dataset = pd.read_csv("C:\\Users\\HP\\Desktop\\ML DATASETS\\AirPassengers.csv")
+# Parse strings to datetime type
+dataset['Month'] = pd.to_datetime(dataset['Month'], infer_datetime_format=True)
+indexedDataset = dataset.set_index(['Month'])
+print(dataset['Month'])
+print(indexedDataset)
+
+
+from datetime import datetime
+indexedDataset['1949-03']
+indexedDataset['1949-03':'1949-06']
+indexedDataset['1949']
+
+plt.xlabel("Date")
+plt.ylabel("Number of air passengers")
+plt.plot(indexedDataset)
+
+import pandas_profiling as pp
+pp.ProfileReport(data)
+
+data.index = pd.to_datetime(data.index)
+print(data.index)
+data.head(5)
+
+data = data.sort_index()
+data.head()
+
+data['Close'].plot()
+plt.ylabel("DAily Bitcoin price")
+
+data = data['Close']
+weekly = data.resample('W').sum()
+weekly.plot()
+plt.ylabel('Weekly bitcoin price')
+
+by_year = data.groupby(data.index.year).mean()
+by_year.plot()
+
+by_weekday = data.groupby(data.index.dayofweek).sum()
+by_weekday.index = ['Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun']
+by_weekday.plot()
+
+by_weekday = data.groupby(data.index.dayofweek).mean()
+by_weekday.index = ['Mon', 'Tues', 'Wed', 'Thurs', 'Fri', 'Sat', 'Sun']
+by_weekday.plot()
+
+by_day = data.groupby(data.index.dayofyear).mean()
+by_day.plot()
+
+by_month = data.groupby(data.index.month).mean()
+by_month.plot()
+
+by_quarter = data.groupby(data.index.quarter).mean()
+by_quarter.plot()
+
+by_quarter = data.groupby(data.index.quarter)
+by_quarter.plot()
+
+by_quarter_overall = data.groupby(data.index.quarter).mean()
+by_quarter_overall.plot()
+
+weekend = np.where(data.index.weekday < 5, 'Weekday', 'Weekend')
+by_time = data.groupby([weekend, data.index.year]).mean()
+fig, ax = plt.subplots(1, 2, figsize=(14, 5))
+by_time.loc['Weekday'].plot(ax=ax[0], title='Weekdays')
+by_time.loc['Weekend'].plot(ax=ax[1], title='Weekends')
+
+ts = data
+plt.plot(ts)
+
+#Determing rolling statistics
+rolmean = indexedDataset.rolling(window=12).mean()
+rolstd = indexedDataset.rolling(window=12).std()
+print(rolmean, rolstd)
+
+#Plot rolling statistics:
+orig = plt.plot(indexedDataset, color='blue',label='Original')
+mean = plt.plot(rolmean, color='red', label='Rolling Mean')
+std = plt.plot(rolstd, color='black', label = 'Rolling Std')
+plt.legend(loc='best')
+plt.title('Rolling Mean & Standard Deviation')
+plt.show(block=False)
+    
+#Perform Dickey-Fuller test:
+from statsmodels.tsa.stattools import adfuller
+
+print ('Results of Dickey-Fuller Test:')
+dftest = adfuller(indexedDataset['#Passengers'], autolag='AIC')
+dfoutput = pd.Series(dftest[0:4], index=['Test Statistic','p-value','#Lags Used','Number of Observations Used'])
+for key,value in dftest[4].items():
+    dfoutput['Critical Value (%s)'%key] = value
+print(dfoutput)
+
+# Estimating trend
+indexedDataset_logScale = np.log(indexedDataset)
+plt.plot(indexedDataset_logScale)
+
+#! moving Average
+movingAverage = indexedDataset_logScale.rolling(window=12).mean()
+movingSTD = indexedDataset_logScale.rolling(window=12).std()
+plt.plot(indexedDataset_logScale)
+plt.plot(movingAverage, color='red')
+
+# Get the difference between the moving average and the actual number of passengers
+datasetLogScaleMinusMovingAverage = indexedDataset_logScale - movingAverage
+datasetLogScaleMinusMovingAverage.head(12)
+#Remove Nan Values
+datasetLogScaleMinusMovingAverage.dropna(inplace=True)
+datasetLogScaleMinusMovingAverage.head(10)
+
+from statsmodels.tsa.stattools import adfuller
+def test_stationarity(timeseries):
+    
+    #Determing rolling statistics
+    movingAverage = timeseries.rolling(window=12).mean()
+    movingSTD = timeseries.rolling(window=12).std()
+
+    #Plot rolling statistics:
+    orig = plt.plot(timeseries, color='blue',label='Original')
+    mean = plt.plot(movingAverage, color='red', label='Rolling Mean')
+    std = plt.plot(movingSTD, color='black', label = 'Rolling Std')
+    plt.legend(loc='best')
+    plt.title('Rolling Mean & Standard Deviation')
+    plt.show(block=False)
+    
+    #Perform Dickey-Fuller test:
+    print('Results of Dickey-Fuller Test:')
+    dftest = adfuller(timeseries['#Passengers'], autolag='AIC')
+    dfoutput = pd.Series(dftest[0:4], index=['Test Statistic','p-value','#Lags Used','Number of Observations Used'])
+    for key,value in dftest[4].items():
+        dfoutput['Critical Value (%s)'%key] = value
+    print(dfoutput)
+
+test_stationarity(datasetLogScaleMinusMovingAverage)
+
+#2 exponentialDecayWeightedAverage
+exponentialDecayWeightedAverage = indexedDataset_logScale.ewm(halflife=12, min_periods=0, adjust=True).mean()
+plt.plot(indexedDataset_logScale)
+plt.plot(exponentialDecayWeightedAverage, color='red')
+
+datasetLogScaleMinusMovingExponentialDecayAverage = indexedDataset_logScale - exponentialDecayWeightedAverage
+test_stationarity(datasetLogScaleMinusMovingExponentialDecayAverage)
+
+#3 Differncing
+datasetLogDiffShifting = indexedDataset_logScale - indexedDataset_logScale.shift()
+plt.plot(datasetLogDiffShifting)
+
+datasetLogDiffShifting.dropna(inplace=True)
+test_stationarity(datasetLogDiffShifting)
+
+
+#4 Decomposition method
+from statsmodels.tsa.seasonal import seasonal_decompose
+decomposition = seasonal_decompose(indexedDataset_logScale)
+
+trend = decomposition.trend
+seasonal = decomposition.seasonal
+residual = decomposition.resid
+
+plt.subplot(411)
+plt.plot(indexedDataset_logScale, label='Original')
+plt.legend(loc='best')
+plt.subplot(412)
+plt.plot(trend, label='Trend')
+plt.legend(loc='best')
+plt.subplot(413)
+plt.plot(seasonal,label='Seasonality')
+plt.legend(loc='best')
+plt.subplot(414)
+plt.plot(residual, label='Residuals')
+plt.legend(loc='best')
+plt.tight_layout()
+
+decomposedLogData = residual
+decomposedLogData.dropna(inplace=True)
+test_stationarity(decomposedLogData)
+
+# ACF,PCF
+
+#ACF and PACF plots:
+from statsmodels.tsa.stattools import acf, pacf
+
+lag_acf = acf(datasetLogDiffShifting, nlags=20)
+lag_pacf = pacf(datasetLogDiffShifting, nlags=20, method='ols')
+
+
+#Plot ACF: 
+plt.subplot(121) 
+plt.plot(lag_acf)
+plt.axhline(y=0,linestyle='--',color='gray')
+plt.axhline(y=-1.96/np.sqrt(len(datasetLogDiffShifting)),linestyle='--',color='gray')
+plt.axhline(y=1.96/np.sqrt(len(datasetLogDiffShifting)),linestyle='--',color='gray')
+plt.title('Autocorrelation Function')
+
+#Plot PACF:
+plt.subplot(122)
+plt.plot(lag_pacf)
+plt.axhline(y=0,linestyle='--',color='gray')
+plt.axhline(y=-1.96/np.sqrt(len(datasetLogDiffShifting)),linestyle='--',color='gray')
+plt.axhline(y=1.96/np.sqrt(len(datasetLogDiffShifting)),linestyle='--',color='gray')
+plt.title('Partial Autocorrelation Function')
+plt.tight_layout()
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+import warnings
+from statsmodels.tsa.arima_model import ARIMA
+from sklearn.metrics import mean_squared_error
+
+# evaluate an ARIMA model for a given order (p,d,q)
+def evaluate_arima_model(X, arima_order):
+# prepare training dataset
+    train_size = int(len(X) * 0.66)
+    train, test = X[0:train_size], X[train_size:]
+    history = [x for x in train]
+    # make predictions
+    predictions = list()
+    for t in range(len(test)):
+        model = ARIMA(history, order=arima_order)
+        model_fit = model.fit(disp=0)
+        yhat = model_fit.forecast()[0]
+        predictions.append(yhat)
+        history.append(test[t])
+    # calculate out of sample error
+    error = mean_squared_error(test, predictions)
+    return error
+
+ 
+# evaluate combinations of p, d and q values for an ARIMA model
+def evaluate_models(dataset, p_values, d_values, q_values):
+    dataset = dataset.astype('float32')
+    best_score, best_cfg = float("inf"), None
+    for p in p_values:
+        for d in d_values:
+            for q in q_values:
+                order = (p,d,q)
+                try:
+                    mse = evaluate_arima_model(dataset, order)
+                    if mse < best_score:
+                        best_score, best_cfg = mse, order
+                    print('ARIMA%s MSE=%.3f' % (order,mse))
+                except:
+                    continue
+    print('Best ARIMA%s MSE=%.3f' % (best_cfg, best_score))
+ 
+import warnings
+from pandas import read_csv
+from pandas import datetime
+from statsmodels.tsa.arima_model import ARIMA
+from sklearn.metrics import mean_squared_error
+from pandas import Series
+import pandas as pd
+
+# load dataset
+series = pd.read_csv('C:\\Users\\HP\\Desktop\\ML DATASETS\\daily-total-female-births-CA.csv', header=0, index_col=0, parse_dates=True, squeeze=True)
+
+# evaluate parameters
+p_values = [0, 1, 2, 4]
+d_values = range(0, 3)
+q_values = range(0, 3)
+warnings.filterwarnings("ignore")
+evaluate_models(series.values, p_values, d_values, q_values)
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2
+
+
+
+
+
+from statsmodels.tsa.arima_model import ARIMA
+
+#AR MODEL
+model = ARIMA(indexedDataset_logScale, order=(2, 1, 0))  
+results_AR = model.fit(disp=-1)  
+plt.plot(datasetLogDiffShifting)
+plt.plot(results_AR.fittedvalues, color='red')
+plt.title('RSS: %.4f'% sum((results_AR.fittedvalues-datasetLogDiffShifting["#Passengers"])**2))
+print('Plotting AR model')
+
+#MA MODEL
+model = ARIMA(indexedDataset_logScale, order=(0, 1, 2))  
+results_MA = model.fit(disp=-1)  
+plt.plot(datasetLogDiffShifting)
+plt.plot(results_MA.fittedvalues, color='red')
+plt.title('RSS: %.4f'% sum((results_MA.fittedvalues-datasetLogDiffShifting["#Passengers"])**2))
+print('Plotting AR model')
+
+
+# Combined ARIMA Model
+
+model = ARIMA(indexedDataset_logScale, order=(2, 1, 2))  
+results_ARIMA = model.fit(disp=-1)  
+plt.plot(datasetLogDiffShifting)
+plt.plot(results_ARIMA.fittedvalues, color='red')
+plt.title('RSS: %.4f'% sum((results_ARIMA.fittedvalues-datasetLogDiffShifting["#Passengers"])**2))
+
+predictions_ARIMA_diff = pd.Series(results_ARIMA.fittedvalues, copy=True)
+print (predictions_ARIMA_diff.head())
+
+#Convert to cumulative sum
+predictions_ARIMA_diff_cumsum = predictions_ARIMA_diff.cumsum()
+print (predictions_ARIMA_diff_cumsum.head())
+
+#predictions_ARIMA_log = pd.Series(ts_log.ix[0], index=ts_log.index)
+#predictions_ARIMA_log = predictions_ARIMA_log.add(predictions_ARIMA_diff_cumsum,fill_value=0)
+#predictions_ARIMA_log.head()
+
+predictions_ARIMA_log = pd.Series(indexedDataset_logScale['#Passengers'].ix[0], index=indexedDataset_logScale['#Passengers'].index)
+predictions_ARIMA_log = predictions_ARIMA_log.add(predictions_ARIMA_diff_cumsum,fill_value=0)
+predictions_ARIMA_log.head()
+
+predictions_ARIMA = np.exp(predictions_ARIMA_log)
+plt.plot(indexedDataset)
+plt.plot(predictions_ARIMA)
+plt.title('RMSE: %.4f'% np.sqrt(sum((predictions_ARIMA-indexedDataset["#Passengers"])**2)/len(indexedDataset["#Passengers"])))
+
+indexedDataset_logScale
+
+#We have 144(existing data of 12 yrs in months) data points. 
+#And we want to forecast for additional 120 data points or 10 yrs.
+results_ARIMA.plot_predict(1,264) 
+#x=results_ARIMA.forecast(steps=120)
+
+# ********************************************NATURAL LANGUAGE PROCESSING  **********************************
+#******************************************________________________________***********************
+#************************************************************************************************
+#Import the packages
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+#Read the file
+data=pd.read_csv("C:\\Users\\HP\\Downloads\\amazon-fine-food-reviews\\Reviews.csv")
+
+#find type
+print(data.dtypes)
+# find categorical variables
+categorical = [var for var in data.columns if data[var].dtype=='O']
+print('There are {} categorical variables'.format(len(categorical)))
+# find numerical variables
+numerical = [var for var in data.columns if data[var].dtype!='O']
+print('There are {} numerical variables'.format(len(numerical)))
+# view of categorical variables
+print(data[categorical].head())
+# view of numerical variables
+print(data[numerical].head())
+print(data.shape)
+print(data.info())
+print(data.describe())
+print(data.columns)
+
+
+#check missing values
+data.isna().sum()
+#drop all rows that have any NaN values
+data=data.dropna()     
+
+# Drop a row by condition
+data=data[data.Score != 3]
+data.head()
+
+data['Positivity'] = np.where(data['Score'] > 3, 1, 0)
+data.head()
+
+data=data.drop("Score",axis=1)
+
+# neg_data = data[data['Positivity'] == 0][0:2500]
+# pos_data = data[data['Positivity'] == 1][0:2500]
+# sample_data = pd.concat([neg_data, pos_data])
+# data['Positivity'].value_counts()
+
+#Sorting data according to ProductId in ascending order
+sorted_data = data.sort_values('ProductId', axis=0, ascending=True, inplace=False, kind='quicksort', na_position='last')
+
+#Deduplication of entries
+final = sorted_data.drop_duplicates(subset = {"UserId","ProfileName","Time","Text"}, keep ='first', inplace=False)
+final.shape
+
+#(HelpfulnessNumerator)/(HelpfulnessNumerator+HelpfulnessDenominator)>0 and if not remove
+final=final[final.HelpfulnessNumerator<=final.HelpfulnessDenominator]
+final.shape
+
+
+final['Positivity'].value_counts()
+
+sns.countplot(final['Positivity'])
+
+#Checking to see how much % of data still remains
+(final['Id'].size*1.0)/(data['Id'].size*1.0)*100
+
+final=final[0:5000]
+
+# Cleaning the texts
+import re
+import string
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+ps = PorterStemmer()
+from nltk.stem.wordnet import WordNetLemmatizer
+
+from nltk import stem
+import nltk
+nltk.download('stopwords')
+
+import re
+
+def decontracted(phrase):
+    # specific
+    phrase = re.sub(r"won't", "will not", phrase)
+    phrase = re.sub(r"can\'t", "can not", phrase)
+
+    # general
+    phrase = re.sub(r"n\'t", " not", phrase)
+    phrase = re.sub(r"\'re", " are", phrase)
+    phrase = re.sub(r"\'s", " is", phrase)
+    phrase = re.sub(r"\'d", " would", phrase)
+    phrase = re.sub(r"\'ll", " will", phrase)
+    phrase = re.sub(r"\'t", " not", phrase)
+    phrase = re.sub(r"\'ve", " have", phrase)
+    phrase = re.sub(r"\'m", " am", phrase)
+    return phrase
+
+final.columns
+
+# ************
+# Preprocessing of text
+# loading stop words from nltk library
+stop_words = set(stopwords.words('english'))
+?
+?
+def nlp_preprocessing(total_text, index, column):
+    if type(total_text) is not int:
+        string = ""
+        # replace every special char with space
+        total_text = re.sub('[^a-zA-Z0-9\n]', ' ', total_text)
+        # replace multiple spaces with single space
+        total_text = re.sub('\s+',' ', total_text)
+        # converting all the chars into lower-case.
+        total_text = total_text.lower()
+        
+        for word in total_text.split():
+        # if the word is a not a stop word then retain that word from the data
+            if not word in stop_words:
+                string += word + " "
+        
+        data_text[column][index] = string
+
+#text processing stage.
+start_time = time.clock()
+for index, row in data_text.iterrows():
+    if type(row['TEXT']) is str:
+        nlp_preprocessing(row['TEXT'], index, 'TEXT')
+    else:
+        print("there is no text description for id:",index)
+print('Time took for preprocessing the text :',time.clock() - start_time, "seconds")
+
+# ****************
+#merging both gene_variations and text data based on ID
+result = pd.merge(data, data_text,on='ID', how='left')
+result.head()
+result[result.isnull().any(axis=1)]
+result.loc[result['TEXT'].isnull(),'TEXT'] = result['Gene'] +' '+result['Variation']
+result[result['ID']==1109]
+
+# ***************
+from tqdm import tqdm
+corpus = []
+for sentance in tqdm(final["Text"].values):
+    #remove the tags
+    cleanr = re.compile('<.*?>')
+    review = re.sub(cleanr, ' ', sentance)
+    review = decontracted(review)
+    #remove the numeric values
+    review = re.sub('[^a-zA-Z]', ' ', review)
+    #remove the special characters
+    review = re.sub(r'[?|!|\'|"|#]',r'',review)
+    review = re.sub(r'[.|,|)|(|\|/]',r' ',review)
+    #replace multiple spaces with single space
+    review = re.sub('\s+',' ', review)
+    #convert all to lower
+    review = review.lower()
+    #splilt the sentence to words
+    review = review.split()
+    #remove the stop words
+    review = [ps.stem(word) for word in review if not word in set(stopwords.words('english'))]
+    review = ' '.join(review)
+    corpus.append(review)
+    final.append(corpus)
+print(ps.stem('Loved'))
+
+y= final['Positivity'].values
+X = final["Text"].values
+
+# Splitting the dataset into the Training set and Test set
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.20, random_state = 0)
+
+#***********************  BOG OF WORDS   *********************************************
+# Creating the Bag of Words model by n_gram
+from sklearn.feature_extraction.text import CountVectorizer
+cv = CountVectorizer(max_features=1500,ngram_range=(1,2) )
+X_train = cv.fit_transform(X_train)
+X_test=cv.transform(X_test)
+
+print(type(X_train))
+print(type(X_test))
+print(X_train.shape)
+print(y_train.shape)
+
+
+X_train=X_train.toarray()
+X_test=X_test.toarray()
+
+# *********************************
+klist = list(range(1,30,2))
+klist
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import cross_val_score
+cv_scores = []
+for k in klist:
+    knn = KNeighborsClassifier(n_neighbors=k, n_jobs=-1)
+    scores = cross_val_score(knn, X_train, y_train, cv=10, scoring='accuracy', n_jobs=-1)
+    cv_scores.append(scores.mean())
+    
+error = [1 - x for x in cv_scores]
+optimal_k = klist[error.index(min(error))]
+plt.plot(klist, error)
+xy = (optimal_k, min(error))
+plt.annotate('(%s, %s)' % xy, xy = xy, textcoords='data')
+plt.xlabel("Number of neighbours 'k'")
+plt.ylabel("Misclassification Error")
+plt.show()
+
+# Accuracy on test data;
+knn = KNeighborsClassifier(n_neighbors=optimal_k, n_jobs=-1)
+knn.fit(X_train, y_train)
+y_pred = knn.predict(X_test)
+acc = accuracy_score(y_test, y_pred) * 100
+print('\nThe accuracy of the knn classifier for k = %d is %f%%' % (optimal_k, acc))
+
+# **********************************
+#***********************  TF_IDF   *********************************************
+
+#tf_idf_vect 
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import TfidfVectorizer
+tf_idf_vect = TfidfVectorizer(ngram_range=(1,2))
+X_train = tf_idf_vect.fit_transform(X_train)
+X_test=tf_idf_vect.transform(X_test)
+
+#***********************  UP SAMPLING   *********************************************
+
+#upsampling
+from sklearn.utils import resample
+# Separate majority and minority classes
+df_majority = final[final.Positivity==1]
+df_minority = final[final.Positivity==0]
+# Upsample minority class
+df_minority_upsampled = resample(df_minority, 
+                                 replace=True,     # sample with replacement
+                                 n_samples=307054,    # to match majority class
+                                 random_state=123) # reproducible results
+ 
+# Combine majority class with upsampled minority class
+df_upsampled = pd.concat([df_majority, df_minority_upsampled])
+
+#***********************  WORD TO VEC   *********************************************
+
+
+# converting the train set into clean form which does not contain html tags etc.
+import gensim
+i=0
+list_of_sent_train=[]
+for sent in x_train['CleanedText'].values:
+    filtered_sentence=[]
+    sent=cleanhtml(sent)
+    for w in sent.split():
+        for cleaned_words in cleanpunc(w).split():
+            if(cleaned_words.isalpha()):    
+                filtered_sentence.append(cleaned_words.lower())
+            else:
+                continue 
+    list_of_sent_train.append(filtered_sentence)
+
+# Doing the same for test dataset.
+list_of_sent_test=[]
+for sent in x_test['CleanedText'].values:
+    filtered_sentence=[]
+    sent=cleanhtml(sent)
+    for w in sent.split():
+        for cleaned_words in cleanpunc(w).split():
+            if(cleaned_words.isalpha()):    
+                filtered_sentence.append(cleaned_words.lower())
+            else:
+                continue 
+    list_of_sent_test.append(filtered_sentence)
+
+# Training the wor2vec model using train dataset
+w2v_model=gensim.models.Word2Vec(list_of_sent_train,min_count=5,size=20, workers=4) 
+
+#*********************** AVG WORD TO VEC   *********************************************
+
+sent_vectors_train = []; # the avg-w2v for each sentence/review is stored in this train
+for sent in list_of_sent_train: # for each review/sentence
+    sent_vec = np.zeros(20) # as word vectors are of zero length
+    cnt_words =0; # num of words with a valid vector in the sentence/review
+    for word in sent: # for each word in a review/sentence
+        try:
+            vec = w2v_model.wv[word]
+            sent_vec += vec
+            cnt_words += 1
+        except:
+            pass
+    sent_vec /= cnt_words
+    sent_vectors_train.append(sent_vec)
+    
+print (len(sent_vectors_train))
+print (len(sent_vectors_train[0]))
+
+sent_vectors_test = []; # the avg-w2v for each sentence/review is stored in this test
+for sent in list_of_sent_test: # for each review/sentence
+    sent_vec = np.zeros(20) # as word vectors are of zero length
+    cnt_words =0; # num of words with a valid vector in the sentence/review
+    for word in sent: # for each word in a review/sentence
+        try:
+            vec = w2v_model.wv[word]
+            sent_vec += vec
+            cnt_words += 1
+        except:
+            pass
+    sent_vec /= cnt_words
+    sent_vectors_test.append(sent_vec)
+    
+print (len(sent_vectors_test))
+print (len(sent_vectors_test[0]))
+
+
+
+# ******************************************** APRIORI  **********************************
+#******************************************______________********************************
+#************************************************************************************************
+
+# Apriori
+
+# Importing the libraries
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Data Preprocessing
+dataset = pd.read_csv('Market_Basket_Optimisation.csv', header = None)
+transactions = []
+for i in range(0, 7501):
+    transactions.append([str(dataset.values[i,j]) for j in range(0, 20)])
+
+# Training Apriori on the dataset
+from apyori import apriori
+rules = apriori(transactions, min_support = 0.003, min_confidence = 0.2, min_lift = 3, min_length = 2)
+
+# Visualising the results
+results = list(rules)
+
+
+

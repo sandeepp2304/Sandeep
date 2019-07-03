@@ -1,0 +1,1997 @@
+##### ** NOTEPAD CONTAINS ** ##
+----------------------------------
+-----------------------------------
+@@)DATA PREPROCESSING
+1-Importing the libraries
+2-Importing the dataset
+3-Labeling Target Variable
+4-FEATURE SCALING
+5-Taking care of missing data
+6-Encoding categorical data(DUMMY)
+7-droping missing values in column
+8-droping column
+@@)EXPLORY DATA ANALYSIS
+9-Data iformation
+10-SUMMARY
+11-CORRELATION PLOT
+12-KDE PLOT
+13-CROSS TABLE
+14-COUNT PLOT HORIZONTAL
+15-HIST PLOT
+16-PIE CHART
+17-COUNT PLOT FOR CATEGORICAL FEATURES
+18-FACTOR PLOT
+19-COUNT PLOT
+SCATTER PLOT
+PAIR PLOT
+HISTOGRAM
+PDF&CDF
+MEAN ,VARIANCE,STANDARD DEVIATION #####
+MEDIAN ,PERCENTILE,IQR, QUANTILE,MAD 
+MISSING RATIO
+FEATURE IMPORTANCE
+PEARSON COEFFICIANT
+QQ PLOT
+BOX PLOT
+VOILIN PLOT
+@@)CONVERTING IMBALANCED TO BALANCED DATA
+BAR PLOT
+ALL SALES PER YEAR
+LAMBDA FUNCTIONS
+ASSAIGNING AND REPLACING MISSING VALUES
+@@)CROSS VALIDATION TECHNIQUES
+SELECTING K VALUE FOR KNN CROSS VALIDATION
+SELECTING K VALUE FOR KNN AND RF
+Pipeline for kfold using Support Vector Machine
+GRID SEARCH
+AUC SCORE FOR TAIN AND TEST
+CONFUSION MATRIX CLEARLY EXPLAINED
+@@)ALL CLASSIFICATIONS
+CLASSIFICATION VISUALISATION
+@@)ALL REGRESSIONS
+REGRESSIONS VISUALISATION
+Visualising the Polynomial Regression results 
+@@)FEATURE ELEMINATION
+BACKWARD ELEMINATION
+STEPWISE ELEMINATION
+K BEST FEATURE ELEMINATION
+RFE ELEMINATION
+RFECV ELEMINATION
+REMOVE COLLINEAR FEATURES
+@@)DIMENSIONALITY RREDUCTION
+TSNE
+PCA
+KERNAL PCA
+LDA
+FITTING ALGORITHAM FOR DIMENSIONALITY REDUCTION TECHNIQUE
+@@)VISUALISATION OF CLASSIFICATION & REGRESSION
+@@)CLUSTERING
+K MEANS
+HEIRACHICAL
+VISUALISATION
+@@)simple cross validation method
+
+
+
+
+
+#*********************************__DATA PREPROCESSING__**********************************
+******************************************************************************************8
+*****************************************************************************************
+# Data Preprocessing
+
+# Importing the libraries
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+import pandas_profiling as pp
+#*****************************************
+
+# Importing the dataset
+dataset = pd.read_csv('Data.csv')
+X = dataset.iloc[:, :-1].values
+y = dataset.iloc[:, 3].values
+           or
+y=data_dummy['Attrition']
+X=data_dummy.drop(columns="Attrition",axis=1)
+           or
+x,y = df.loc[:,df.columns != 'class'], df.loc[:,'class']
+
+
+#*****************************************
+https://www.kaggle.com/annavictoria/ml-friendly-public-datasets
+
+#Attrition Yes=1,Attrition No=0
+# data= [1 if each == "Yes" else 0 for each in data.Attrition]
+                 OR
+#rename Attrition (Yes/No) as Attrition
+data.rename(columns={'Attrition (Yes/No)':'Attrition' }, inplace=True)
+print(data.columns)
+#*****************************************
+
+# Taking care of missing data
+dataset["Age"].fillna(dataset["Age"].median(skipna=True), inplace=True)
+dataset["Salary"].fillna(dataset["Salary"].median(skipna=True), inplace=True)
+dataset["Country"].fillna(dataset["Salary"].mode(), inplace=True)
+
+#*****************************************
+
+
+# Encoding categorical data
+# Encoding the Independent Variable
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+labelencoder_X = LabelEncoder()
+X[:, 0] = labelencoder_X.fit_transform(X[:, 0])
+onehotencoder = OneHotEncoder(categorical_features = [0])
+X = onehotencoder.fit_transform(X).toarray()
+# Encoding the Dependent Variable
+labelencoder_y = LabelEncoder()
+y = labelencoder_y.fit_transform(y)
+
+                or 
+
+data_dummy= pd.get_dummies(data, columns=['Attrition','Department', 'Job Role','Gender','Marital Status','Education'], drop_first=True)
+data_dummy.head()
+
+			or
+
+#Attrition Yes=1,Attrition No=0
+# data= [1 if each == "Yes" else 0 for each in data.Attrition]
+
+                       or
+
+#label term column
+dataframe['Term'].replace(("Short Term","Long Term"),(0,1), inplace=True)
+dataframe.head()
+
+                         or
+
+
+# data.loc[data['OverTime']=='No','OverTime'] = 0
+# data.loc[data['OverTime']=='Yes','OverTime'] = 1
+#*****************************************
+#*****************************************
+# ################# Feature Scaling ##########
+#*****************************************
+"""from sklearn.preprocessing import StandardScaler
+sc_X = StandardScaler()
+X_train = sc_X.fit_transform(X_train)
+X_test = sc_X.transform(X_test)
+sc_y = StandardScaler()
+y_train = sc_y.fit_transform(y_train)"""
+
+#*****************************************
+#*****************************************
+# droping missing values in column
+#drop  missing vlaues in loan status
+dataframe.dropna(subset=['Loan Status'], inplace = True)
+
+
+#*****************************************
+
+# droping column
+
+dataframe=dataframe.drop(columns=['Credit Score'], axis=1)
+dataframe.columns
+
+
+
+https://www.kaggle.com/annavictoria/ml-friendly-public-datasets
+#*********************************__EXPLORY DATA ANALYSIS__**********************************
+******************************************************************************************8
+#*****************************************************************************************
+##### Data iformation #######
+____________________________
+#find type
+print(dataset.dtypes)
+# find categorical variables
+categorical = [var for var in dataset.columns if dataset[var].dtype=='O']
+print('There are {} categorical variables'.format(len(categorical)))
+# find numerical variables
+numerical = [var for var in dataset.columns if dataset[var].dtype!='O']
+print('There are {} numerical variables'.format(len(numerical)))
+# view of categorical variables
+dataset[categorical].head()
+# view of numerical variables
+dataset[numerical].head()
+
+#*****************************************************************************************
+
+# let's visualise the percentage of missing values
+x=dataset.isnull().mean()
+print(x)
+# let's visualise the values of the discrete variables
+for var in ['State']:
+    print(var, ' values: ', dataset[var].unique())
+
+pp.ProfileReport(dataset)
+print(data.head())
+print(data.shape)
+print(data.describe())
+print(data.info())
+print(data.columns)
+print(data.dtypes)
+print(data.Platform.unique())
+
+
+print(data.info())
+from tabulate import tabulate
+tabulate(data.info(), headers='keys', tablefmt='psql')
+#*****************************************************************************************
+##### SUMMARY ####$
+____________________
+
+import statsmodels.formula.api as sm
+X_opt = X[:, [0, 1, 2, 3, 4, 5]]
+regressor_OLS = sm.OLS(endog = y, exog = X_opt).fit()
+regressor_OLS.summary()
+
+#*****************************************************************************************
+
+###CORRELATION PLOT###
+____________________
+
+#plot correlation [plot]
+fig,ax = plt.subplots(figsize=(38, 38))
+sns.heatmap(data_dummy.corr(), ax=ax, annot=True, linewidths=0.05, fmt= '.2f',cmap="magma")
+plt.show()
+
+### KDE PLOT###
+____________________
+
+
+sns.kdeplot(df['Age'],shade=True,color='#ff4125')
+
+
+#***************************************************************************************** 
+
+
+### CROSS TABLE ###
+____________________
+
+pd.crosstab(columns=[df.Attrition],index=[df.Gender],margins=True,normalize='index')
+#***************************************************************************************** 
+
+### COUNT PLOT HORIZONTAL ###
+___________________________
+
+
+dataframe['Purpose'].value_counts().sort_values(ascending=True).plot(kind='barh', title="Purpose for Loans", figsize=(15,10))
+#***************************************************************************************** 
+
+### HIST PLOT###
+____________________
+
+fig, ax = plt.subplots(figsize=(5, 4))
+sns.distplot(df3['age'],  
+             hist_kws={"alpha": 1, "color": "blue"}, 
+             kde=False, bins=8)
+ax= ax.set(ylabel="Count", xlabel="Age")
+
+#*****************************************************************************************
+
+### PIE CHART ###
+________________________________________
+
+plt.pie(df3['guardian'].value_counts().tolist(), 
+        labels=['mother', 'father', 'other'], colors=['red', 'green','blue'], 
+        autopct='%1.1f%%', startangle=90)
+axis = plt.axis('equal')
+
+#*****************************************************************************************
+
+###COUNT PLOT FOR CATEGORICAL FEATURES ###
+________________________________________
+
+plot_cat('BusinessTravel') 
+
+#*****************************************************************************************
+  
+
+### FACTOR PLOT ###
+_______________________________________
+
+sns.factorplot(data=df,y='Age',x='Attrition',size=5,aspect=1,kind='box')
+    
+#*****************************************************************************************
+
+###COUNT PLOT###
+____________________
+
+data_dummy["Attrition"].value_counts()
+sns.countplot(data_dummy["Attrition"],label='count')
+
+           or
+ #observe the term
+scount = dataframe[dataframe['Term'] == 0]['Term'].count()
+lcount = dataframe[dataframe['Term'] ==1]['Term'].count()
+
+data = {"Counts":[scount, lcount]}
+termDF = pd.DataFrame(data, index=["Short Term", "Long Term"])
+termDF.head()
+
+#*****************************************************************************************
+###SCATTER PLOT###
+____________________
+sns.set_style("whitegrid");
+sns.FacetGrid(iris, hue="species", size=4) \
+   .map(plt.scatter, "sepal_length", "sepal_width") \
+   .add_legend();
+plt.show();
+
+
+#*****************************************************************************************
+###PAIR PLOT####
+_______________
+plt.close();
+sns.set_style("whitegrid");
+sns.pairplot(iris, hue="species", size=3);
+plt.show()
+
+#*****************************************************************************************
+###HISTOGRAM#####
+____________________
+import numpy as np
+iris_setosa = iris.loc[iris["species"] == "setosa"];
+iris_virginica = iris.loc[iris["species"] == "virginica"];
+iris_versicolor = iris.loc[iris["species"] == "versicolor"];
+#print(iris_setosa["petal_length"])
+sns.FacetGrid(iris, hue="species", size=5) \
+   .map(sns.distplot, "petal_length") \
+   .add_legend();
+plt.show();
+
+#*****************************************************************************************
+#### PDF & CDF ####
+_________________
+counts, bin_edges = np.histogram(iris_setosa['petal_length'], bins=10, 
+                                 density = True)
+pdf = counts/(sum(counts))
+print(pdf);
+print(bin_edges);
+cdf = np.cumsum(pdf)
+plt.plot(bin_edges[1:],pdf);
+plt.plot(bin_edges[1:], cdf)
+
+
+counts, bin_edges = np.histogram(iris_setosa['petal_length'], bins=20, 
+                                 density = True)
+pdf = counts/(sum(counts))
+plt.plot(bin_edges[1:],pdf);
+
+plt.show();
+#*****************************************************************************************
+##### MEAN ,VARIANCE,STANDARD DEVIATION #####
+_____________________________________________
+print("Means:")
+print(np.mean(iris_setosa["petal_length"]))
+print("\nStd-dev:");
+print(np.std(iris_setosa["petal_length"]))
+
+#*****************************************************************************************
+
+##### MEDIAN ,PERCENTILE,IQR, QUANTILE,MAD #####
+________________________________________________
+print("\nMedians:")
+print(np.median(iris_setosa["petal_length"]))
+
+print("\nQuantiles:")
+print(np.percentile(iris_setosa["petal_length"],np.arange(0, 100, 25)))
+
+print("\n90th Percentiles:")
+print(np.percentile(iris_setosa["petal_length"],90))
+
+from statsmodels import robust
+print ("\nMedian Absolute Deviation")
+print(robust.mad(iris_setosa["petal_length"]))
+
+#*****************************************************************************************
+
+##### MISSING RATIO #####
+____________________
+
+data_na = (data.isnull().sum() / len(data)) * 100
+data_na = data_na.drop(data_na[data_na == 0].index).sort_values(ascending=False)[:30]
+missing_data = pd.DataFrame({'Missing Ratio' :data_na})
+missing_data.head(16)
+
+
+##### FEATURE IMPORTANCE #####
+______________________________
+
+def plot_feature_importances(importances, features):
+    # get the importance rating of each feature and sort it
+    indices = np.argsort(importances)
+
+    # make a plot with the feature importance
+    plt.figure(figsize=(12,14), dpi= 80, facecolor='w', edgecolor='k')
+    plt.grid()
+    plt.title('Feature Importances')
+    plt.barh(range(len(indices)), importances[indices], height=0.8, color='mediumvioletred', align='center')
+    plt.axvline(x=0.03)
+    plt.yticks(range(len(indices)), list(X_train))
+    plt.xlabel('Relative Importance')
+    plt.show()
+
+plot_feature_importances(random_forest.feature_importances_, X_train)
+#*****************************************************************************************
+#method:2
+importances = pd.DataFrame({'feature':X_train.columns,'importance':np.round(random_forest.feature_importances_,3)})
+importances = importances.sort_values('importance',ascending=False).set_index('feature')
+importances.plot.bar()
+
+##### ##### PEARSON COEFFICIANT #####
+______________________________
+
+from scipy import stats
+pearson_coef, p_value = stats.pearsonr(df['YearsInCurrentRole'], df['Attrition'])
+print("The Pearson Correlation Coefficient is", pearson_coef, " with a P-value of P =", p_value)
+
+################## QQ PLOT#########
+______________________________ #####____________________
+#continueous variables
+#Get also the QQ-plot
+fig = plt.figure()
+res = stats.probplot(data['Global_Sales'], plot=plt)
+plt.show()
+#*****************************************************************************************
+
+##### BOXPLOT #####
+____________________
+sns.boxplot(x='species',y='petal_length', data=iris)
+plt.show()
+
+#*****************************************************************************************
+
+##### VOILIN PLOT #####
+_______________________
+sns.violinplot(x="species", y="petal_length", data=iris, size=8)
+plt.show()
+
+#*****************************************************************************************
+
+##### CONVERTING IMBALANCED TO BALANCED DATA #####
+_______________________
+#upsampling
+from sklearn.utils import resample
+# Separate majority and minority classes
+df_majority = data_dummy[data_dummy.Attrition==0]
+df_minority = data_dummy[data_dummy.Attrition==1]
+# Upsample minority class
+df_minority_upsampled = resample(df_minority, 
+                                 replace=True,     # sample with replacement
+                                 n_samples=1233,    # to match majority class
+                                 random_state=123) # reproducible results
+ 
+# Combine majority class with upsampled minority class
+df_upsampled = pd.concat([df_majority, df_minority_upsampled])
+y=df_upsampled['Attrition']
+X=df_upsampled.drop(columns="Attrition")
+y.value_counts()
+
+
+#*****************************************************************************************
+
+#####  BAR GRAPHS #####
+_______________________
+from matplotlib import pyplot as plt 
+x = [5,8,10] 
+y = [12,16,6]  
+
+x2 = [6,9,11] 
+y2 = [6,15,7] 
+plt.bar(x, y, align = 'center') 
+plt.bar(x2, y2, color = 'g', align = 'center') 
+plt.title('Bar graph') 
+plt.ylabel('Y axis') 
+plt.xlabel('X axis')
+plt.legend(["good","bad"])
+plt.show()
+
+#*****************************************************************************************
+
+#####  ALL SALES VS YEAR  #####
+__________________________________
+
+df[[x for x in df.columns if 'Sales' in x] + ['Year_of_Release']].groupby('Year_of_Release').sum().plot();
+
+df[[x for x in df.columns if 'Sales' in x] + ['Year_of_Release']].groupby('Year_of_Release').sum().plot(kind='bar', rot=45);
+
+
+#*****************************************************************************************
+
+#####  lambda function  #####
+__________________________________
+
+#dividing with 10
+dataframe['Credit Score'] = dataframe['Credit Score'].apply(lambda val: (val /10) if val>850 else val)
+
+                                        or
+ dataframe['Credit Score'] = dataframe['Credit Score'].apply(lambda val: "Average" if np.isreal(val) and (val >= 580 and val < 670) else val)
+
+
+# Replace missing values of credit score on bias of term column with mean
+############################################################ #####
+__________________________________
+#0-change off mean
+cscoredf = dataframe[dataframe['Term']==0]
+stermAVG = cscoredf['Credit Score'].mean()
+print(stermAVG)
+dataframe.loc[(dataframe.Term ==0) & (dataframe['Credit Score'].isnull()),'Credit Score'] = stermAVG
+
+#****************************************************************************************
+# *************** CROSS VALIDATION TECHNIQUES ***********************************
+# ****************************************************************
+
+#****************************************************************************************
+# *SELECTING K VALUE FOR KNN CROSS VALIDATION
+# ****************************************************************
+klist = list(range(1,30,2))
+klist
+cv_scores = []
+sent_vectors_train = np.array(sent_vectors_train)
+sent_vectors_train = np.nan_to_num(sent_vectors_train)
+for k in klist:
+    knn = KNeighborsClassifier(n_neighbors=k, n_jobs=-1)
+    scores = cross_val_score(knn, sent_vectors_train, y_train, cv=10, scoring='accuracy', n_jobs=-1)
+    cv_scores.append(scores.mean())
+error = [1 - x for x in cv_scores]
+optimal_k = klist[error.index(min(error))]
+plt.plot(klist, error)
+xy = (optimal_k, min(error))
+plt.annotate('(%s, %s)' % xy, xy = xy, textcoords='data')
+plt.xlabel("Number of neighbours 'k'")
+plt.ylabel("Misclassification Error")
+plt.show()
+# Accuracy on test data;
+knn = KNeighborsClassifier(n_neighbors=optimal_k, n_jobs=-1)
+knn.fit(sent_vectors_train, y_train)
+y_pred = knn.predict(sent_vectors_test)
+acc = accuracy_score(y_test, y_pred) * 100
+print('\nThe accuracy of the knn classifier for k = %d is %f%%' % (optimal_k, acc))
+
+# *************************************************
+# *************************************************
+# SELECTING K VALUE FOR KNN AND RF
+# *************************************************
+# *************************************************
+_____________-**************-____________________
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.model_selection import train_test_split
+x,y = df.loc[:,df.columns != 'class'], df.loc[:,'class']
+x_train,x_test,y_train,y_test = train_test_split(x,y,test_size = 0.3,random_state = 2,shuffle=True)
+# Model complexity
+neig = np.arange(1, 27)
+# trees = np.arange(1, 50)
+train_accuracy = []
+test_accuracy = []
+# Loop over different values of k
+for i, k in enumerate(neig):
+    # k from 1 to 27(exclude)
+    knn = KNeighborsClassifier(n_neighbors=k)
+    #rf = RandomForestClassifier(random_state = 8, n_estimators=k, min_samples_split=2)
+    # Fit with knn
+    knn.fit(x_train,y_train)
+    # rf.fit(x_train,y_train)
+    #train accuracy
+    train_accuracy.append(knn.score(x_train, y_train))
+    # test accuracy
+    test_accuracy.append(knn.score(x_test, y_test))
+
+# Plot
+plt.figure(figsize=[13,8])
+plt.plot(neig, test_accuracy, label = 'Testing Accuracy')
+plt.plot(neig, train_accuracy, label = 'Training Accuracy')
+plt.legend()
+plt.title('k value VS Accuracy')
+plt.xlabel('Number of Neighbors')
+plt.ylabel('Accuracy')
+plt.xticks(neig)
+plt.show()
+print("Best accuracy is {} with K = {}".format(np.max(test_accuracy),1+test_accuracy.index(np.max(test_accuracy))))
+# *************************************************
+
+# *************************************************
+# Pipeline for kfold using Support Vector Machine
+# *************************************************
+_____________-**************-____________________
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.pipeline import Pipeline
+from sklearn.cross_validation import StratifiedKFold
+from sklearn.model_selection import cross_val_score
+
+X = df.ix[:, 1:27]
+y = df["Fault"]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 0)
+X_train_array = X_train.values
+y_train_array = y_train.values
+
+
+def Run(X_train_array, y_train_array, model):
+    pipe = Pipeline([('sc', StandardScaler()),
+                ('model', model)])
+    
+    kfold = StratifiedKFold(y=y_train, n_folds=10, random_state=0)
+    scores = []
+    for k, (train, test) in enumerate(kfold):
+        pipe.fit(X_train_array[train], y_train_array[train])
+        score = pipe.score(X_train_array[test], y_train_array[test])
+        scores.append(score)
+        print('Fold: %s, Class dist.: %s, Accuracy: %.3f' % (k+1, np.bincount(y_train_array[train]), (score * 100)))
+    
+    print('CV accuracy: %.3f +/- %.3f' % (np.mean(scores) * 100, np.std(scores) *100))
+
+    scores = cross_val_score(estimator=pipe, X=X_train_array, y=y_train_array, cv=10, n_jobs=-1)
+    print('Cross Validation Accuracy scores: %s' % scores)
+
+#Support Vector Machine:
+
+Run(X_train_array, y_train_array, SVC(kernel='rbf', C=3, gamma=0.05, random_state=0))
+
+#****************************************************************************************
+# *************** GRID SEARCH ***********************************
+# ****************************************************************
+#_______________________-_____________-_____________________
+#importing modules
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+from sklearn.model_selection import GridSearchCV
+from sklearn.tree import DecisionTreeClassifier
+#making the instance
+model= DecisionTreeClassifier(random_state=1234)
+#Hyper Parameters Set
+params = {'criterion':['gini','entropy'],
+          'max_features': ['auto', 'sqrt', 'log2'],
+          'min_samples_split': [2,3,4,5,6,7,8,9,10,11,12,13,14,15], 
+          'min_samples_leaf':[1,2,3,4,5,6,7,8,9,10,11],
+          'random_state':[123]}
+#Making models with hyper parameters sets
+model1 = GridSearchCV(model, param_grid=params, n_jobs=-1)
+#Learning
+model1.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:",model1.best_params_)
+#Prediction
+y_pred_1=model1.predict(X_test)
+y_pred_2=model1.predict(X_train)
+
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#****************************************************************************************
+# *************** AUC SCORE FOR TAIN AND TEST  ***********************************
+# ****************************************************************
+#  LOGISTIC REGRESSION Hyperparameter tuning :
+penalties = ['l1', 'l2']
+C = [0.00001, 0.00005, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100]
+cv_scores = []
+tr_scores = []
+i = 0
+for alpha in C:
+    for p in penalties:
+        clf = LogisticRegression(penalty=p, C=alpha)
+        clf.fit(bow_train, y_train)
+        scores = roc_auc_score(y_true=np.array(y_cv), y_score=clf.predict_proba(X_cv)[:,1])
+        cv_scores.append(scores)
+        scores = roc_auc_score(y_true=np.array(y_train), y_score=clf.predict_proba(X_train)[:,1])
+        tr_scores.append(scores)
+        print("CV ROC_AUC Score : ", cv_scores[i], " Train ROC_AUC Score : ", tr_scores[i], "C : ", alpha, " penalty : ", p)
+        i += 1
+ticks = ['0.00001+L1', '0.00001+L2', '0.00005+L1', '0.00005+L2', '0.0001+L1', '0.0001+L2', '0.001+L1', '0.001+L2',
+         '0.01+L1', '0.01+L2', '0.1+L1', '0.1+L2', '1+L1', '1+L2', '10+L1', '10+L2', '100+L1', '100+L2']
+plt.figure(figsize=(15,3))
+plt.plot(range(len(C)*len(penalties)), tr_scores)
+plt.plot(range(len(C)*len(penalties)), cv_scores)
+plt.xticks(range(len(C)*len(penalties)), ticks, rotation = 45)
+plt.legend(['train', 'cv'])
+plt.show()
+model = LogisticRegression(C=0.1, penalty='l2')
+model.fit(X_train, y_train)
+#****************************************************************************************
+# *************** CONFUSION MATRIX ***********************************
+# ****************************************************************
+# Plots confusion matrix using heatmap and calculates and displays TN,FN,TP,FP
+def plot_confusion_matrix(y_actual, y_predicted):
+    cm = confusion_matrix(y_predicted, y_actual)
+    df = pd.DataFrame(data=cm, index=labels, columns=labels)
+    print("Confusion Matrix : ")
+    plt.figure(figsize=(10,7))
+    sns.heatmap(df, annot=True)
+    plt.show()
+    
+    TP = 0
+    FP = 0
+    TN = 0
+    FN = 0
+
+    for i in range(len(y_predicted)): 
+        if y_actual[i]== 1 and y_predicted[i]==1:
+            TP += 1
+        if y_predicted[i]==1 and y_actual[i]!=y_predicted[i]:
+            FP += 1
+        if y_actual[i]==y_predicted[i]==0:
+            TN += 1
+        if y_predicted[i]==0 and y_actual[i]!=y_predicted[i]:
+            FN += 1
+            
+    print("True Positives :", TP)
+    print("False Positives :", FP)
+    print("True Negatives :", TN)
+    print("False Negatives :", FN)
+**************************************    ALL   CLASSIFIERS     **************************************
+**************************************************************************************************
+#*************************************DesicionTree******************************888
+#importing modules
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+from sklearn.model_selection import GridSearchCV
+from sklearn.tree import DecisionTreeClassifier
+#making the instance
+model= DecisionTreeClassifier(random_state=1234)
+#Hyper Parameters Set
+params = {'criterion':['gini','entropy'],
+          'max_features': ['auto', 'sqrt', 'log2'],
+          'min_samples_split': [2,3,4,5,6,7,8,9,10,11,12,13,14,15], 
+          'min_samples_leaf':[1,2,3,4,5,6,7,8,9,10,11],
+          'random_state':[123]}
+#Making models with hyper parameters sets
+model1 = GridSearchCV(model, param_grid=params, n_jobs=-1)
+#Learning
+model1.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:",model1.best_params_)
+#Prediction
+y_pred_1=model1.predict(X_test)
+y_pred_2=model1.predict(X_train)
+
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+
+#*******************************************************8
+#***********************GENERAL DECISION TREE **************
+from sklearn.tree import DecisionTreeClassifier
+clf=DecisionTreeClassifier(random_state=123)
+clf.fit(X_train,y_train)
+y_pred_1=clf.predict(X_test)
+y_pred_2=clf.predict(X_train)
+
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************************
+#***************************RANDOM FOREST **********************************
+#Randomforest
+#importing modules
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+#making the instance
+model=RandomForestClassifier()
+#hyper parameters set
+params = {'criterion':['gini','entropy'],
+          'max_features': ['auto', 'sqrt', 'log2'],
+          'n_estimators':[10,15,20,25,30],
+          'min_samples_leaf':[1,2,3],
+          'min_samples_split':[3,4,5,6,7], 
+          'random_state':[123],
+          'bootstrap': [True,False],
+          'random_state':[126],
+          'n_jobs':[-1]}
+#Making models with hyper parameters sets
+model2 = GridSearchCV(model, param_grid=params, n_jobs=-1)
+#learning
+model2.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:\n",model2.best_params_)
+#Prediction
+y_pred_1=model2.predict(X_test)
+y_pred_2=model2.predict(X_train)
+
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#***********************GENERAL RANDOM FOREST**********************
+from sklearn.ensemble import RandomForestClassifier
+clf4=RandomForestClassifier(random_state=124)
+clf4.fit(X_train,y_train)
+y_pred_1=clf4.predict(X_test)
+y_pred_2=clf4.predict(X_train)
+
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#***********************SVM****************************************
+#SVM
+#importing modules
+from sklearn.model_selection import GridSearchCV
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+#making the instance
+model=SVC()
+#Hyper Parameters Set
+params = {'C': [6,7,8,9,10,11,12], 
+          'gamma': [0.001, 0.01, 0.1, 1, 10, 100],
+          'kernel': ['linear','rbf'],
+         'random_state':[143]}
+#Making models with hyper parameters sets
+model3 = GridSearchCV(model, param_grid=params, n_jobs=-1)
+#Learning
+model3.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:\n",model3.best_params_)
+#Prediction
+y_pred_1=model3.predict(X_test)
+y_pred_2=model3.predict(X_train)
+
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** GENERAL SVM****************************************
+
+from sklearn.svm import SVC
+clf1=SVC(random_state=1)
+clf1.fit(X_train,y_train)
+#Prediction
+y_pred_1=clf1.predict(X_test)
+y_pred_2=clf1.predict(X_train)
+
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** LOGISTIC REGRESSION****************************************
+#Logistic regression
+#Create estimator class
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import  GridSearchCV
+model = LogisticRegression()
+
+#Create param grid
+params = {'C': [0.001,0.005,0.01, 0.05, 0.1, 0.5, 1, 5, 10], 'penalty': ['l1','l2'],'random_state':[125]}
+
+#Making models with hyper parameters sets
+model4 = GridSearchCV(model, param_grid=params, n_jobs=-1)
+#Learning
+model4.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:\n",model4.best_params_)
+#Prediction
+y_pred_1=model4.predict(X_test)
+y_pred_2=model4.predict(X_train)
+
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** GENERAL LOGISTIC REGRESSION****************************************
+from sklearn.linear_model import LogisticRegression
+lg_reg=LogisticRegression(random_state=12)
+lg_reg.fit(X_train,y_train)
+#Prediction
+y_pred_1=lg_reg.predict(X_test)
+y_pred_2=lg_reg.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** GRADIENT BOOST CLASSIFIER****************************************
+#GradientBoostingClassifier
+#importing modules
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+#making the instance
+model=GradientBoostingClassifier()
+#hyper parameters set
+params = {'learning_rate': [0.005 ,0.05, 0.5, 1.5],
+          'max_depth': [2, 4, 6, 8],
+          'max_features': ['auto', 'sqrt', 'log2'],
+          'n_estimators':[10,15,20,25,30],
+          'random_state':[127]
+          }
+#Making models with hyper parameters sets
+model5 = GridSearchCV(model, param_grid=params, n_jobs=-1)
+#learning
+model5.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:\n",model1.best_params_)
+#Prediction
+y_pred_1 =model5.predict(X_test)
+y_pred_2 = model5.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+
+#********************************************************************
+#*********************** GENERAL GRADIENT BOOST CLASSIFIER****************************************
+from sklearn.ensemble import GradientBoostingClassifier
+gbc=GradientBoostingClassifier(random_state=23)
+gbc.fit(X_train,y_train)
+#Prediction
+y_pred_1 =gbc.predict(X_test)
+y_pred_2 = gbc.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+#********************************************************************
+#*********************** EXTRA TREE CLASSIFIER****************************************
+#ExtraTreesClassifier
+from sklearn.ensemble import ExtraTreesClassifier
+model= ExtraTreesClassifier()
+params= {"max_depth": [None],
+              "max_features": [10, 17],
+              "min_samples_split": [2, 3, 10],
+              "min_samples_leaf": [1, 3, 10],
+              "bootstrap": [False, True],
+              "n_estimators" :[50,100,200],
+              "criterion": ["gini","entropy"],
+               "random_state":[123]
+
+          }
+#Making models with hyper parameters sets
+model6 = GridSearchCV(model, param_grid=params, n_jobs=-1)
+#learning
+model6.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:\n",model6.best_params_)
+#Prediction
+y_pred_1 =model6.predict(X_test)
+y_pred_2 = model6.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+#********************************************************************
+#*********************** GENERAL EXTRA TREE CLASSIFIER****************************************
+from sklearn.ensemble import ExtraTreesClassifier
+model= ExtraTreesClassifier()
+model.fit(X_train,y_train)
+#Prediction
+y_pred_1 =model.predict(X_test)
+y_pred_2 = model.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** BAGGING CLASSIFIER****************************************
+
+#BaggingClassifier
+from sklearn.ensemble import BaggingClassifier
+model= BaggingClassifier()
+params= {
+              "bootstrap": [False, True],
+              "n_estimators" :[50,100,200],
+                "random_state":[128]
+          }
+#Making models with hyper parameters sets
+model7 = GridSearchCV(model, param_grid=params, n_jobs=-1)
+#learning
+model7.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:\n",model1.best_params_)
+#Prediction
+y_pred_1=model7.predict(X_test)
+y_pred_2 = model7.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+
+#********************************************************************
+#*********************** GENERAL BAGGING CLASSIFIER****************************************
+
+from sklearn.ensemble import BaggingClassifier
+bac= BaggingClassifier(random_state=13)
+bac.fit(X_train,y_train)
+#Prediction
+y_pred_1 =bac.predict(X_test)
+y_pred_2 = bac.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** XG BOOST CLASSIFIER****************************************
+
+#XGBoostclassifier
+#pip3 install xgboost
+from xgboost import XGBoostClassifier
+model= XGBClassifier()
+params= {
+        'min_child_weight': [1, 5, 10],
+        'gamma': [0.5, 1, 1.5, 2, 5],
+        'subsample': [0.6, 0.8, 1.0],
+        'colsample_bytree': [0.6, 0.8, 1.0],
+        'max_depth': [3, 4, 5],
+    'random_state':[129]
+        }
+#Making models with hyper parameters sets
+model8 = GridSearchCV(model, param_grid=params, n_jobs=-1)
+#learning
+model8.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:\n",model1.best_params_)
+#Prediction
+y_pred_1=model8.predict(X_test)
+y_pred_2 = model8.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** GENERAL XG BOOST CLASSIFIER****************************************
+
+from xgboost import XGBoostClassifier
+model= XGBClassifier(random_state=13)
+model.fit(X_train,y_train)
+#Prediction
+y_pred_1=model.predict(X_test)
+y_pred_2 = model.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** NAIVE BAYES CLASSIFIER****************************************
+
+#Naive Bayes
+#importing modules
+from sklearn.model_selection import GridSearchCV
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+#making the instance
+model=GaussianNB()
+#Hyper Parameters Set
+params = {'priors':[[0.01, 0.99],[0.1, 0.9], [0.2, 0.8], [0.25, 0.75], [0.3, 0.7],[0.35, 0.65], [0.4, 0.6] ]}
+
+#Making models with hyper parameters sets
+model11 = GridSearchCV(model, param_grid=params, n_jobs=-1)
+#Learning
+model11.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:\n",model11.best_params_)
+#Prediction
+y_pred_1 = model11.predict(X_test)
+y_pred_2 = model11.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+
+
+#********************************************************************
+#*********************** GENERAL NAIVE BAYES CLASSIFIER****************************************
+from sklearn.naive_bayes import GaussianNB
+model=GaussianNB()
+model.fit(X_train,y_train)
+#Prediction
+y_pred_1 = model.predict(X_test)
+y_pred_2 = model.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** MULTINOMIAL NAIVE BAYES CLASSIFIER****************************************
+
+#multinomial NB
+#importing modules
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+#making the instance
+model=MultinomialNB()
+#hyper parameters set
+params = {'alpha':[0.00001, 0.00005, 0.0001, 0.001, 0.01, 0.1, 1, 10, 100, 250, 500, 1000]}
+          
+#Making models with hyper parameters sets
+model12 = GridSearchCV(model, param_grid=params, n_jobs=-1)
+#learning
+model12.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:\n",model12.best_params_)
+#Prediction
+y_pred_1 = model12.predict(X_test)
+y_pred_2 = model12.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** GENERAL MULTINOMIAL NAIVE BAYES CLASSIFIER****************************************
+
+from sklearn.naive_bayes import MultinomialNB
+model=MultinomialNB()
+model.fit(X_train,y_train)
+#Prediction
+y_pred_1 = model.predict(X_test)
+y_pred_2 = model.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+
+#********************************************************************
+#*********************** ADA BOOST CLASSIFIER****************************************
+
+#Adaboost
+from sklearn.ensemble import AdaBoostClassifier
+model =AdaBoostClassifier()
+#Hyper Parameters Set
+cl1 = LogisticRegression()
+cl2 = DecisionTreeClassifier()
+cl3 = GaussianNB()
+params = {'base_estimator':[cl1, cl2, cl3],
+        'random_state':[124]
+        }
+#Making models with hyper parameters sets
+model13 = GridSearchCV(model, param_grid=params, n_jobs=-1)
+#Learning
+model13.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:\n",model13.best_params_)
+#Prediction
+y_pred_1=model13.predict(X_test)
+y_pred_2 = model13.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** GENERAL ADA BOOST CLASSIFIER****************************************
+
+from sklearn.ensemble import  AdaBoostClassifier
+model=AdaBoostClassifier()
+model.fit(X_train,y_train)
+#Prediction
+y_pred_1 = model.predict(X_test)
+y_pred_2 = model.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** LINEAR DISCREMENENT ANALYSIS CLASSIFIER****************************************
+#LinearDiscriminantAnalysis
+from sklearn.metrics import accuracy_score,classification_report,confusion_matrix
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+model=LinearDiscriminantAnalysis()
+model.fit(X_train,y_train)
+#Prediction
+y_pred_1 = model.predict(X_test)
+y_pred_2 = model.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** QUADRATIC DISCREMINENT ANALYSIS CLASSIFIER****************************************
+#QuadraticDiscriminantAnalysis
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+model=QuadraticDiscriminantAnalysis()
+model.fit(X_train,y_train)
+#Prediction
+y_pred_1 = model.predict(X_test)
+y_pred_2 = model.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#*********************** KNN CLASSIFIER****************************************
+#kNearestNeighbors
+#importing modules
+from sklearn.model_selection import GridSearchCV
+from sklearn.neighbors import KNeighborsClassifier
+#making the instance
+model = KNeighborsClassifier(n_jobs=-1)
+#Hyper Parameters Set
+params = {'n_neighbors':[5,6,7,8,9,10],
+          'leaf_size':[1,2,3,5,6,7,8,20],
+          'weights':['uniform', 'distance'],
+          'algorithm':['auto', 'ball_tree','kd_tree','brute'],
+          }
+#Making models with hyper parameters sets
+model9 = GridSearchCV(model, param_grid=params, n_jobs=1)
+#Learning
+model9.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:\n",model9.best_params_)
+#Prediction
+#Prediction
+y_pred_1=model9.predict(X_test)
+y_pred_2 = model9.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+#********************************************************************
+#***********************  GENERAL KNN CLASSIFIER****************************************
+from sklearn.neighbors import KNeighborsClassifier
+model = KNeighborsClassifier()
+model.fit(X_train,y_train)
+#Prediction
+y_pred_1=model.predict(X_test)
+y_pred_2 = model.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+
+#********************************************************************
+#***********************  SGD CLASSIFIER****************************************
+
+#SGD classifier
+#importing modules
+from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import SGDClassifier
+#making the instance
+model = SGDClassifier()
+#Hyper Parameters Set
+params = {
+    "n_iter": [5, 10, 20, 50, 100, 1000],
+    "loss" : ["hinge", "log", "squared_hinge", "modified_huber"],
+    "alpha" : [0.0001, 0.001, 0.01, 0.1],
+    "penalty" : ["l2", "l1"],
+    'random_state':[124]
+        }
+#Making models with hyper parameters sets
+model10 = GridSearchCV(model, param_grid=params, n_jobs=-1)
+#Learning
+model10.fit(X_train,y_train)
+#The best hyper parameters set
+print("Best Hyper Parameters:\n",model10.best_params_)
+#Prediction
+y_pred_1=model10.predict(X_test)
+y_pred_2 = model10.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+
+#********************************************************************
+#***********************  GENERAL SGD CLASSIFIER****************************************
+from sklearn.linear_model import SGDClassifier
+model = SGDClassifier()
+model.fit(X_train,y_train)
+#Prediction
+y_pred_1=model.predict(X_test)
+y_pred_2 = model.predict(X_train)
+print("****** report on test data********************************")
+print(accuracy_score(y_pred_1,y_test))
+print(confusion_matrix(y_pred_1,y_test))
+print(classification_report(y_pred_1,y_test))
+print("****** report on train  data********************************")
+print(accuracy_score(y_pred_2,y_train))
+print(confusion_matrix(y_pred_2,y_train))
+print(classification_report(y_pred_2,y_train))
+
+******************************* VISUALING CLASSIFICATIONS *************************************
+#**********************************************************************************
+*********************************************************************************
+#************************************************************************************88
+# Visualising the Training set results
+from matplotlib.colors import ListedColormap
+X_set, y_set = X_train, y_train
+X1, X2 = np.meshgrid(np.arange(start = X_set[:, 0].min() - 1, stop = X_set[:, 0].max() + 1, step = 0.01),
+                     np.arange(start = X_set[:, 1].min() - 1, stop = X_set[:, 1].max() + 1, step = 0.01))
+plt.contourf(X1, X2, classifier.predict(np.array([X1.ravel(), X2.ravel()]).T).reshape(X1.shape),
+             alpha = 0.75, cmap = ListedColormap(('red', 'green')))
+plt.xlim(X1.min(), X1.max())
+plt.ylim(X2.min(), X2.max())
+for i, j in enumerate(np.unique(y_set)):
+    plt.scatter(X_set[y_set == j, 0], X_set[y_set == j, 1],
+                c = ListedColormap(('red', 'green'))(i), label = j)
+plt.title('Kernel SVM (Training set)')
+plt.xlabel('Age')
+plt.ylabel('Estimated Salary')
+plt.legend()
+plt.show()
+#**********************************************************************************
+#*************************************************************************************
+# Visualising the Test set results
+from matplotlib.colors import ListedColormap
+X_set, y_set = X_test, y_test
+X1, X2 = np.meshgrid(np.arange(start = X_set[:, 0].min() - 1, stop = X_set[:, 0].max() + 1, step = 0.01),
+                     np.arange(start = X_set[:, 1].min() - 1, stop = X_set[:, 1].max() + 1, step = 0.01))
+plt.contourf(X1, X2, classifier.predict(np.array([X1.ravel(), X2.ravel()]).T).reshape(X1.shape),
+             alpha = 0.75, cmap = ListedColormap(('red', 'green')))
+plt.xlim(X1.min(), X1.max())
+plt.ylim(X2.min(), X2.max())
+for i, j in enumerate(np.unique(y_set)):
+    plt.scatter(X_set[y_set == j, 0], X_set[y_set == j, 1],
+                c = ListedColormap(('red', 'green'))(i), label = j)
+plt.title('Kernel SVM (Test set)')
+plt.xlabel('Age')
+plt.ylabel('Estimated Salary')
+plt.legend()
+plt.show
+
+#********************************************************88
+#******************** ALL REGRESSIONS ************************************88
+#********************************************************88
+# Importing the libraries
+import numpy as np
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+#********************************************************88
+# Importing the dataset
+dataset = pd.read_csv('Position_Salaries.csv')
+X = dataset.iloc[:, 1:2].values
+y = dataset.iloc[:, 2].values
+#********************************************************88
+# Encoding categorical data
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+labelencoder = LabelEncoder()
+X[:, 3] = labelencoder.fit_transform(X[:, 3])
+onehotencoder = OneHotEncoder(categorical_features = [3])
+X = onehotencoder.fit_transform(X).toarray()
+               or
+X=pd.get_dummies(X,columns=["surgery","sex"],drop_first="True")
+X.head()
+#********************************************************88
+
+# Splitting the dataset into the Training set and Test set
+"""from sklearn.cross_validation import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.2, random_state = 0)"""
+
+#********************************************************88
+# Feature Scaling
+"""from sklearn.preprocessing import StandardScaler
+sc_X = StandardScaler()
+X_train = sc_X.fit_transform(X_train)
+X_test = sc_X.transform(X_test)
+sc_y = StandardScaler()
+y_train = sc_y.fit_transform(y_train)"""
+#********************************************************88
+#********************************************************88
+#*****************SVR***************************************88
+# Fitting SVR to the dataset
+from sklearn.svm import SVR
+regressor = SVR(kernel = 'rbf')
+regressor.fit(X, y)
+
+# Predicting a new result
+y_pred = regressor.predict(6.5)
+y_pred = sc_y.inverse_transform(y_pred)
+
+***********************************************************
+***********************************************************8
+#*****************DECISION TREE***************************************88
+# Fitting Decision Tree Regression to the dataset
+from sklearn.tree import DecisionTreeRegressor
+regressor = DecisionTreeRegressor(random_state = 0)
+regressor.fit(X, y)
+
+***********************************************************
+***********************************************************8
+#*****************RANDOM FOREST***************************************88
+# Fitting Random Forest Regression to the dataset
+from sklearn.ensemble import RandomForestRegressor
+regressor = RandomForestRegressor(n_estimators = 10, random_state = 0)
+regressor.fit(X, y)
+
+***********************************************************
+***********************************************************8
+*******************MLR****************************************8
+# Fitting Multiple Linear Regression to the Training set
+from sklearn.linear_model import LinearRegression
+regressor = LinearRegression()
+regressor.fit(X_train, y_train)
+
+***********************************************************
+***********************************************************8
+*********************PLR**************************************8
+# Fitting Linear Regression to the dataset
+from sklearn.linear_model import LinearRegression
+lin_reg = LinearRegression()
+lin_reg.fit(X, y)
+
+# Fitting Polynomial Regression to the dataset
+from sklearn.preprocessing import PolynomialFeatures
+poly_reg = PolynomialFeatures(degree = 4)
+X_poly = poly_reg.fit_transform(X)
+poly_reg.fit(X_poly, y)
+lin_reg_2 = LinearRegression()
+lin_reg_2.fit(X_poly, y)
+***********************************************************
+***********************************************************8
+
+******************************* VISUALISING REGRESSIONS *************************************
+*********************************************************************************
+#************************************************************************************88
+# Visualising the Training set results
+plt.scatter(X_train, y_train, color = 'red')
+plt.plot(X_train, regressor.predict(X_train), color = 'blue')
+plt.title('Salary vs Experience (Training set)')
+plt.xlabel('Years of Experience')
+plt.ylabel('Salary')
+plt.show()
+
+#*********************************************************************************
+#************************************************************************************88
+# Visualising the Test set results
+plt.scatter(X_test, y_test, color = 'red')
+plt.plot(X_train, regressor.predict(X_train), color = 'blue')
+plt.title('Salary vs Experience (Test set)')
+plt.xlabel('Years of Experience')
+plt.ylabel('Salary')
+plt.show()
+#*********************************************************************************
+#************************************************************************************88
+# Visualising the Polynomial Regression results (for higher resolution and smoother curve)
+X_grid = np.arange(min(X), max(X), 0.1)
+X_grid = X_grid.reshape((len(X_grid), 1))
+plt.scatter(X, y, color = 'red')
+plt.plot(X_grid, lin_reg_2.predict(poly_reg.fit_transform(X_grid)), color = 'blue')
+plt.title('Truth or Bluff (Polynomial Regression)')
+plt.xlabel('Position level')
+plt.ylabel('Salary')
+plt.show()
+
+#*********************************__FEATURE ELEMINATION__**********************************
+******************************************************************************************8
+#*****************************************************************************************
+##### BACKWARD ELEMINATION #######
+#________________________________
+#Backward Elimination with p-values
+import statsmodels.formula.api as sm
+def backwardElimination(x, sl):
+    numVars = len(x[0])
+    for i in range(0, numVars):
+        regressor_OLS = sm.OLS(y, x).fit()
+        maxVar = max(regressor_OLS.pvalues).astype(float)
+        if maxVar > sl:
+            for j in range(0, numVars - i):
+                if (regressor_OLS.pvalues[j].astype(float) == maxVar):
+                    x = np.delete(x, j, 1)
+    regressor_OLS.summary()
+    return x
+ 
+SL = 0.05
+X_opt = X[:, [0, 1, 2, 3, 4, 5]]
+X_Modeled = backwardElimination(X_opt, SL)
+#************************************************************8
+#Backward Elimination with p-values and Adjusted R Squared:
+
+import statsmodels.formula.api as sm
+def backwardElimination(x, SL):
+    numVars = len(x[0])
+    temp = np.zeros((50,6)).astype(int)
+    for i in range(0, numVars):
+        regressor_OLS = sm.OLS(y, x).fit()
+        maxVar = max(regressor_OLS.pvalues).astype(float)
+        adjR_before = regressor_OLS.rsquared_adj.astype(float)
+        if maxVar > SL:
+            for j in range(0, numVars - i):
+                if (regressor_OLS.pvalues[j].astype(float) == maxVar):
+                    temp[:,j] = x[:, j]
+                    x = np.delete(x, j, 1)
+                    tmp_regressor = sm.OLS(y, x).fit()
+                    adjR_after = tmp_regressor.rsquared_adj.astype(float)
+                    if (adjR_before >= adjR_after):
+                        x_rollback = np.hstack((x, temp[:,[0,j]]))
+                        x_rollback = np.delete(x_rollback, j, 1)
+                        print (regressor_OLS.summary())
+                        return x_rollback
+                    else:
+                        continue
+    regressor_OLS.summary()
+    return x
+ 
+SL = 0.05
+X_opt = X[:, [0, 1, 2, 3, 4, 5]]
+X_Modeled = backwardElimination(X_opt, SL)
+
+#************************************************************8
+
+##### STEPWISE ELEMINATION #######
+
+import statsmodels.api as sm
+
+
+def stepwise_selection(X, y, 
+                       initial_list=[], 
+                       threshold_in=0.01, 
+                       threshold_out = 0.05, 
+                       verbose=True):
+    """ Perform a forward-backward feature selection 
+    based on p-value from statsmodels.api.OLS
+    Arguments:
+        X - pandas.DataFrame with candidate features
+        y - list-like with the target
+        initial_list - list of features to start with (column names of X)
+        threshold_in - include a feature if its p-value < threshold_in
+        threshold_out - exclude a feature if its p-value > threshold_out
+        verbose - whether to print the sequence of inclusions and exclusions
+    Returns: list of selected features 
+    Always set threshold_in < threshold_out to avoid infinite looping.
+    See https://en.wikipedia.org/wiki/Stepwise_regression for the details
+    """
+    included = list(initial_list)
+    while True:
+        changed=False
+        # forward step
+        excluded = list(set(X.columns)-set(included))
+        new_pval = pd.Series(index=excluded)
+        for new_column in excluded:
+            model = sm.OLS(y, sm.add_constant(pd.DataFrame(X[included+[new_column]]))).fit()
+            new_pval[new_column] = model.pvalues[new_column]
+        best_pval = new_pval.min()
+        if best_pval < threshold_in:
+            best_feature = new_pval.argmin()
+            included.append(best_feature)
+            changed=True
+            if verbose:
+                print('Add  {:30} with p-value {:.6}'.format(best_feature, best_pval))
+
+        # backward step
+        model = sm.OLS(y, sm.add_constant(pd.DataFrame(X[included]))).fit()
+        # use all coefs except intercept
+        pvalues = model.pvalues.iloc[1:]
+        worst_pval = pvalues.max() # null if pvalues is empty
+        if worst_pval > threshold_out:
+            changed=True
+            worst_feature = pvalues.argmax()
+            included.remove(worst_feature)
+            if verbose:
+                print('Drop {:30} with p-value {:.6}'.format(worst_feature, worst_pval))
+        if not changed:
+            break
+    return included
+
+result = stepwise_selection(X, y)
+
+print('resulting features:')
+print(result)
+#************************************************************8
+# #  ############### Remove Collinear Features  ###########
+#************************************************************8
+#************************************************************8
+
+def remove_collinear_features(x, threshold):
+    '''
+    Objective:
+        Remove collinear features in a dataframe with a correlation coefficient
+        greater than the threshold. Removing collinear features can help a model
+        to generalize and improves the interpretability of the model.
+        
+    Inputs: 
+        threshold: any features with correlations greater than this value are removed
+    
+    Output: 
+        dataframe that contains only the non-highly-collinear features
+    '''
+    
+    # Dont want to remove correlations between Energy Star Score
+    y = x['Loan Status']
+    x = x.drop(columns = ['Loan Status'])
+    
+    # Calculate the correlation matrix
+    corr_matrix = x.corr()
+    iters = range(len(corr_matrix.columns) - 1)
+    drop_cols = []
+
+    # Iterate through the correlation matrix and compare correlations
+    for i in iters:
+        for j in range(i):
+            item = corr_matrix.iloc[j:(j+1), (i+1):(i+2)]
+            col = item.columns
+            row = item.index
+            val = abs(item.values)
+            
+            # If correlation exceeds the threshold
+            if val >= threshold:
+                # Print the correlated features and the correlation value
+                # print(col.values[0], "|", row.values[0], "|", round(val[0][0], 2))
+                drop_cols.append(col.values[0])
+
+    # Drop one of each pair of correlated columns
+    drops = set(drop_cols)
+    x = x.drop(columns = drops)
+    
+    # Add the score back in to the data
+    x['Loan Status'] = y
+               
+    return x
+# Remove the collinear features above a specified correlation coefficient
+credit = remove_collinear_features(credit, 0.6);
+
+
+#***********************************************************************************************************************8
+
+#*****************************************************************************************
+#####  RECURSIVE FEATURE ELIMINATION  #######
+________________________________
+#RFE
+from sklearn.feature_selection import RFE
+from sklearn.ensemble import RandomForestClassifier
+# Create the RFE object and rank each pixel
+clf_rf_3 = RandomForestClassifier()      
+rfe = RFE(estimator=clf_rf_3, n_features_to_select=15, step=1)
+rfe = rfe.fit(X_train, y_train)
+print('Chosen best 5 feature by rfe:',X_train.columns[rfe.support_])
+
+#####  RECURSIVE FEATURE ELIMINATION CROSS VALIDATION #######
+________________________________
+
+from sklearn.feature_selection import RFECV
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+# The "accuracy" scoring is proportional to the number of correct classifications
+clf_rf_4 = LogisticRegression()
+clf_rf_5=  RandomForestClassifier()
+
+rfecv = RFECV(estimator=clf_rf_4, step=1, cv=5,scoring='accuracy')   #5-fold cross-validation
+rfecv = rfecv.fit(X_train, y_train)
+
+print('Optimal number of features :', rfecv.n_features_)
+print('Best features :', X_train.columns[rfecv.support_])
+
+
+
+#####  SELECT K BEST FEATURES #######
+________________________________
+
+#select best features
+from sklearn.feature_selection import SelectKBest
+from sklearn.feature_selection import chi2
+# find best scored 5 features
+select_feature = SelectKBest(chi2, k=5).fit(X_train, y_train)
+print('Score list:', select_feature.scores_)
+print('Feature list:', X_train.columns)
+
+
+#******************************** DIMENSIONALITY REDUCTION************************************************
+#********************************************************************************
+#********************************************************************************
+#********************************************************************************
+# Feature Scaling
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler()
+X_train = sc.fit_transform(X_train)
+X_test = sc.transform(X_test)
+
+#******************************** KERNEL PCA************************************************
+#********************************************************************************
+# Applying Kernel PCA
+from sklearn.decomposition import KernelPCA
+kpca = KernelPCA(n_components = 2, kernel = 'rbf')
+X_train = kpca.fit_transform(X_train)
+X_test = kpca.transform(X_test)
+
+# attaching the label for each 2-d data point 
+pca_data = np.vstack((pca_data.T, labels)).T
+
+# creating a new data fram which help us in ploting the result data
+pca_df = pd.DataFrame(data=X_train, columns=("1st_principal", "2nd_principal", "label"))
+sn.FacetGrid(pca_df, hue="label", size=6).map(plt.scatter, '1st_principal', '2nd_principal').add_legend()
+plt.show()
+
+
+#********************************LDA************************************************
+#********************************************************************************
+# Applying LDA
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis as LDA
+lda = LDA(n_components = 2)
+X_train = lda.fit_transform(X_train, y_train)
+X_test = lda.transform(X_test)
+
+#********************************PCA************************************************
+#********************************************************************************
+# Applying PCA
+from sklearn.decomposition import PCA
+pca = PCA(n_components = 2)
+X_train = pca.fit_transform(X_train)
+X_test = pca.transform(X_test)
+
+#********************************TSNE************************************************
+#********************************************************************************
+from sklearn.manifold import TSNE
+
+model = TSNE(n_components=2, random_state=0)
+# configuring the parameteres
+# the number of components = 2
+# default perplexity = 30
+# default learning rate = 200
+# default Maximum number of iterations for the optimization = 1000
+X_train = pca.fit_transform(X_train)
+X_test = pca.transform(X_test)
+#********************************FITTING ALGORITHAM************************************************
+#********************************************************************************
+#********************************************************************************
+#********************************************************************************
+# Fitting Logistic Regression to the Training set
+from sklearn.linear_model import LogisticRegression
+classifier = LogisticRegression(random_state = 0)
+classifier.fit(X_train, y_train)
+# Predicting the Test set results
+y_pred = classifier.predict(X_test)
+#**********************************************************************************
+# Making the Confusion Matrix
+from sklearn.metrics import confusion_matrix
+cm = confusion_matrix(y_test, y_pred)
+sns.heatmap(cm,annot=True,linewidths=.5)
+****************************VISUALISING CLASSIFICATION*****************************************************
+# Visualising the Training set results
+from matplotlib.colors import ListedColormap
+X_set, y_set = X_train, y_train
+X1, X2 = np.meshgrid(np.arange(start = X_set[:, 0].min() - 1, stop = X_set[:, 0].max() + 1, step = 0.01),
+                     np.arange(start = X_set[:, 1].min() - 1, stop = X_set[:, 1].max() + 1, step = 0.01))
+plt.contourf(X1, X2, classifier.predict(np.array([X1.ravel(), X2.ravel()]).T).reshape(X1.shape),
+             alpha = 0.75, cmap = ListedColormap(('red', 'green', 'blue')))
+plt.xlim(X1.min(), X1.max())
+plt.ylim(X2.min(), X2.max())
+for i, j in enumerate(np.unique(y_set)):
+    plt.scatter(X_set[y_set == j, 0], X_set[y_set == j, 1],
+                c = ListedColormap(('red', 'green', 'blue'))(i), label = j)
+plt.title('Logistic Regression (Training set)')
+plt.xlabel('PC1')
+plt.ylabel('PC2')
+plt.legend()
+plt.show()
+
+#***************************** VISUALISING POLYNOMIAL  REGRESSION****************************************************
+# Visualising the Polynomial Regression results (for higher resolution and smoother curve)
+X_grid = np.arange(min(X), max(X), 0.1)
+X_grid = X_grid.reshape((len(X_grid), 1))
+plt.scatter(X, y, color = 'red')
+plt.plot(X_grid, lin_reg_2.predict(poly_reg.fit_transform(X_grid)), color = 'blue')
+plt.title('Truth or Bluff (Polynomial Regression)')
+plt.xlabel('Position level')
+plt.ylabel('Salary')
+plt.show()
+
+
+
+#***************************  CLUSTERING *******************************************
+#**********************************************************************
+#**********************************************************************
+#****************************KMEANS******************************************
+# Using the elbow method to find the optimal number of clusters
+from sklearn.cluster import KMeans
+wcss = []
+for i in range(1, 11):
+    kmeans = KMeans(n_clusters = i, init = 'k-means++', random_state = 42)
+    kmeans.fit(X)
+    wcss.append(kmeans.inertia_)
+plt.plot(range(1, 11), wcss)
+plt.title('The Elbow Method')
+plt.xlabel('Number of clusters')
+plt.ylabel('WCSS')
+plt.show()
+
+# Fitting K-Means to the dataset
+kmeans = KMeans(n_clusters = 5, init = 'k-means++', random_state = 42)
+y_kmeans = kmeans.fit_predict(X)
+#**********************************************************************
+#************************hierarchy CLUSTER  **********************************************
+
+# Using the dendrogram to find the optimal number of clusters
+import scipy.cluster.hierarchy as sch
+dendrogram = sch.dendrogram(sch.linkage(X, method = 'ward'))
+plt.title('Dendrogram')
+plt.xlabel('Customers')
+plt.ylabel('Euclidean distances')
+plt.show()
+
+# Fitting Hierarchical Clustering to the dataset
+from sklearn.cluster import AgglomerativeClustering
+hc = AgglomerativeClustering(n_clusters = 5, affinity = 'euclidean', linkage = 'ward')
+y_hc = hc.fit_predict(X)
+#**********************************************************************
+#**********************************************************************
+#**********************************************************************
+#************************** # Visualising the clusters ********************************************
+
+plt.scatter(X[y_kmeans == 0, 0], X[y_kmeans == 0, 1], s = 100, c = 'red', label = 'Cluster 1')
+plt.scatter(X[y_kmeans == 1, 0], X[y_kmeans == 1, 1], s = 100, c = 'blue', label = 'Cluster 2')
+plt.scatter(X[y_kmeans == 2, 0], X[y_kmeans == 2, 1], s = 100, c = 'green', label = 'Cluster 3')
+plt.scatter(X[y_kmeans == 3, 0], X[y_kmeans == 3, 1], s = 100, c = 'cyan', label = 'Cluster 4')
+plt.scatter(X[y_kmeans == 4, 0], X[y_kmeans == 4, 1], s = 100, c = 'magenta', label = 'Cluster 5')
+plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], s = 300, c = 'yellow', label = 'Centroids')
+plt.title('Clusters of customers')
+plt.xlabel('Annual Income (k$)')
+plt.ylabel('Spending Score (1-100)')
+plt.legend()
+plt.show()
+
+#  *********************************** simple cross validation method ***************************************
+# ************************************__________________________________**************************************
+# **************************************************************************************************************
+
+
+from sklearn.cross_validation import  train_test_split
+# split the data set into train and test
+X_1, X_test, y_1, y_test =train_test_split(X, y, test_size=0.3, random_state=0)
+
+# split the train data set into cross validation train and cross validation test
+X_tr, X_cv, y_tr, y_cv = train_test_split(X_1, y_1, test_size=0.3)
+
+for i in range(1,30,2):
+    # instantiate learning model (k = 30)
+    knn = KNeighborsClassifier(n_neighbors=i)
+
+    # fitting the model on crossvalidation train
+    knn.fit(X_tr, y_tr)
+
+    # predict the response on the crossvalidation train
+    pred = knn.predict(X_cv)
+
+    # evaluate CV accuracy
+    acc = accuracy_score(y_cv, pred, normalize=True) * float(100)
+    print('\nCV accuracy for k = %d is %d%%' % (i, acc))
+    
+knn = KNeighborsClassifier(1)
+knn.fit(X_tr,y_tr)
+pred = knn.predict(X_test)
+acc = accuracy_score(y_test, pred, normalize=True) * float(100)
